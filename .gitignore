@@ -1,0 +1,3 @@
+**/*.swp
+**/.gradle
+rest-app/build
