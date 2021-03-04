@@ -14,7 +14,7 @@ public class HelloController {
 
 	@RequestMapping("/")
 	public String index(@RequestParam String greet) throws IOException {
-		Path fileName = Path.of("data.txt");
+		Path fileName = Path.of("data", "data.txt");
 		String actual = Files.readString(fileName);
 		String updatedGreets = actual + "<br>\n" + greet;
 		Files.writeString(fileName, updatedGreets);

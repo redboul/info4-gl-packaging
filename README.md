@@ -69,21 +69,19 @@ docker exec <container-id> cat /data.txt
 you can run several ubuntu container without much restriction as they do not use any resources from the main system (your physical machine)  
 each time, looking at the `data.txt` the value will be different.
 
-### Persist the todo data
-By default, the todo app stores its data in a SQLite Database at `/etc/todos/todo.db`. If you’re not familiar with SQLite, no worries! It’s simply a relational database in which all of the data is stored in a single file. While this isn’t the best for large-scale applications, it works for small demos. We’ll talk about switching this to a different database engine later.
+### Persist the data
 
-With the database being a single file, if we can persist that file on the host and make it available to the next container, it should be able to pick up where the last one left off. By creating a volume and attaching (often called “mounting”) it to the directory the data is stored in, we can persist the data. As our container writes to the `todo.db` file, it will be persisted to the host in the volume.
+use the second version of the `HelloController.java` that reads the content of a file to Greet people.
 
-As mentioned, we are going to use a named volume. Think of a named volume as simply a bucket of data. Docker maintains the physical location on the disk and you only need to remember the name of the volume. Every time you use the volume, Docker will make sure the correct data is provided.
+build the app (`gradlew build`)
+build a docker image `docker build -t info4-gl-java-app .`
+run it `docker run -dp 8080:8080 info4-gl-java-app`
+look at the log to ensure the app is up `docker logs -f <container-id>`
 
-Create a volume by using the docker volume create command.
-```
-docker volume create todo-db
-```
+go to [localhost greet someone](http://localhost:8080?greet=someone) and change the `greet` http param to add new names.
 
-let's use the `getting-started` app to persist some database files
-1. stop the existing container and delete it.
-2. start a new container using the just created *volume* 
-  ```
-  docker run -dp 3000:3000 -v todo-db:/etc/todos docker/getting-started
-  ```
+each time your run a new container, the data.txt file is new and nothing is persisted.
+
+#### create a volume
+
+![volume in host and container](https://docs.docker.com/storage/images/types-of-mounts-volume.png)
