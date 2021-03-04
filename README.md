@@ -85,3 +85,58 @@ each time your run a new container, the data.txt file is new and nothing is pers
 #### create a volume
 
 ![volume in host and container](https://docs.docker.com/storage/images/types-of-mounts-volume.png)
+
+use the following command to create a volume
+```
+docker volume create gl-docker
+```
+
+check the details of the volume with
+
+```
+docker volume inspect gl-docker
+```
+
+it will be used to store the data from containers when referenced
+
+rebuild the whole app with 
+```
+gradle build
+docker build -t info4-gl-java-app .
+docker run -dp 8080:8080 -v test:/usr/libs/data info4-gl-java-app
+```
+
+you can even launch several container sharing the same volume and see that the data are shared. But you need to update the port to avoid sharing the same port between container which is not allowed.
+```
+docker run -dp 8080:8080 -v test:/usr/libs/data info4-gl-java-app
+```
+
+## communication between container
+
+let's know use some real application and a database to store the data
+
+We now have a REST app that uses a H2 database to store the data.
+
+let's build and launch the app without docker:
+```
+gradlew build
+java -jar build/libs/spring-boot-0.0.1-SNAPSHOT.jar
+```
+
+go to [guest list](http://localhost:8080/guest) to see the list of existing guest.
+Obviously, there is not any...
+
+use postman to add some
+POST request to _http://localhost:8080/guest_
+Header: *Content-Type: application/json*
+Body:
+```
+{
+    "firstName": "Joann",
+    "lastName": "Sfar"
+}
+```
+
+now you can reload the [guest list](http://localhost:8080/guest) or go directly to the [new guest](http://localhost:8080/guest/1) we have just created
+
+H2 is a in memory

@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RestController
 public class HelloController {
 
-	@RequestMapping("/")
+	@RequestMapping("/file")
 	public String index(@RequestParam String greet) throws IOException {
 		Path fileName = Path.of("data", "data.txt");
 		String actual = Files.readString(fileName);
