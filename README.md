@@ -168,4 +168,11 @@ do the [docker tutorial for network](https://docs.docker.com/network/network-tut
 
 update the app to have a network and use the container names in the URL and have the container talk to each other.
 
-need to use the IP directly in application.properties
+### the network command
+
+```
+docker network create info4-gl-network
+docker run -d -p 1521:1521 -p 81:81 -v data:/opt/h2-data --network info4-gl-network  -e H2_OPTIONS='-ifNotExists' --name=MyH2Instance oscarfonts/h2
+docker run -dp 8080:8080 --network info4-gl-network test | xargs docker logs -f
+```
+
