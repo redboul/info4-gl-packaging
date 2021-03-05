@@ -1,5 +1,14 @@
 # Docker management
 
+## prerequisite
+
+you need to download and install Docker CE and execute the following commands to avoid spending too much time downloading it during the session
+
+```
+docker pull oscarfonts/h2
+docker pull openjdk:11
+```
+
 Steps to keep from docker guide
 
 - `docker run -dp 80:80 docker/getting-started`
@@ -142,12 +151,21 @@ now you can reload the [guest list](http://localhost:8080/guest) or go directly 
 H2 is a in memory database which goes fine there.
 But let's say we have an external database launched in another container.
 
-```
-docker pull oscarfonts/h2
-```
 
 ```
 docker run -d -p 1521:1521 -p 81:81 -v data:/opt/h2-data -e H2_OPTIONS='-ifNotExists' --name=MyH2Instance oscarfonts/h2
 ```
 
-need to use the IP drectly in application.properties
+For you application to be able to use, Spring needs to have the right settings to point to the database.  
+but how can we make containers know each others?
+
+you can use the settings of your local machine (using IP address) in the jdbc URL in the `application.properties`  
+But that is not a long term solution and that breaks the replicability of the containers.
+
+we need to use network for that
+
+do the [docker tutorial for network](https://docs.docker.com/network/network-tutorial-standalone/)
+
+update the app to have a network and use the container names in the URL and have the container talk to each other.
+
+need to use the IP directly in application.properties
