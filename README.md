@@ -139,4 +139,15 @@ Body:
 
 now you can reload the [guest list](http://localhost:8080/guest) or go directly to the [new guest](http://localhost:8080/guest/1) we have just created
 
-H2 is a in memory
+H2 is a in memory database which goes fine there.
+But let's say we have an external database launched in another container.
+
+```
+docker pull oscarfonts/h2
+```
+
+```
+docker run -d -p 1521:1521 -p 81:81 -v data:/opt/h2-data -e H2_OPTIONS='-ifNotExists' --name=MyH2Instance oscarfonts/h2
+```
+
+need to use the IP drectly in application.properties
