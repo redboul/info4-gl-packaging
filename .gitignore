@@ -2,3 +2,6 @@
 **/.gradle
 rest-app/build
 web/node_modules
+rest-app/bin
+rest-app/bin/**
+rest-app/bin/**/*

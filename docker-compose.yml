@@ -1,0 +1,17 @@
+services:
+  rest-app:
+    build: ./rest-app
+    ports:
+      - "8080:8080"
+    links:
+      - MyH2Instance
+  MyH2Instance:
+    image: oscarfonts/h2
+    ports:
+      - "81:81"
+    environment:
+      H2_OPTIONS: -ifNotExists
+    expose:
+      - "1521"
+    volumes:
+      - /opt/h2-data

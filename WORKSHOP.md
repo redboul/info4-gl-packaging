@@ -182,11 +182,46 @@ So now, we want to add simple http server that would serve the html files but al
 
 ### NGINX to the rescue
 
-we will not configure a whole nginx server. We will only make work to 
+we will not configure a whole nginx server. We will only make work to have the static files being served and the calls to the `/guest/` folder being redirected to the *rest-app* container.
 
 ```
 docker run --rm --name some-nginx -v $(pwd)/build:/usr/share/nginx/html:ro -p 54321:80 -d nginx nginx-debug -g 'daemon off;'
 docker run --name some-nginx -v $(pwd)/nginx.conf:/etc/nginx/nginx.conf -v $(pwd)/build:/usr/share/nginx/html:ro -p 54321:80 -d --network info4-gl-network nginx nginx-debug -g 'daemon off;'
 ````
 
-nginx will help 
+This way, we can have a separate container that do the work we're expecting it to do.
+
+But what if we want to do an image about it and not being forced to configure the path to the static files or the configuration file?
+
+We can do it simply using the given same files (_nginx.conf_ and the _build_ folder) and using a Dockerfile from an nginx image and the `COPY` command.
+
+To troubleshoot the containers, you can use the following command line:
+
+```
+docker exec -t -i nginx /bin/bash
+```
+
+It opens a `bash` terminal on the container. You are, however, dependent of the tools that are installed on the container.  
+For instance, on the `nginx` image, neither *vi* nor *nano* are available if you want to edit a file.
+
+To start the container when you have build the right image (`docker build -t proxy-nginx .`), you can use the following command (where there is no volume mounting parameters):
+
+```
+docker run --rm --name nginx  -p 54321:80 -d --network info4-gl-network proxy-nginx nginx-debug -g 'daemon off;'  | xargs docker logs -f
+```
+
+Note that the `--rm` option removes the container (and its logs) when the container is stopped or has a failure.
+
+## Docker Compose
+
+Ok, now we have a running app, but it needs several manual steps to make it work:
+- create a network
+- create volumes
+- create images
+- create container with network, port and volume options
+
+This is kind of a PITA to do all this for our app or when we want to deploy the app on a server...
+
+The docker team had the same reaction and created the `docker-compose` tool to help us.
+
+Using a simple YAML file, all the necessary stuff are created and loaded in an isolated environment.
