@@ -7,6 +7,7 @@ you need to download and install Docker CE and execute the following commands to
 ```
 docker pull oscarfonts/h2
 docker pull openjdk:11
+docker pull nginx
 ```
 
 Steps to keep from docker guide
@@ -173,6 +174,25 @@ update the app to have a network and use the container names in the URL and have
 ```
 docker network create info4-gl-network
 docker run -d -p 1521:1521 -p 81:81 -v data:/opt/h2-data --network info4-gl-network  -e H2_OPTIONS='-ifNotExists' --name=MyH2Instance oscarfonts/h2
-docker run -dp 8080:8080 --network info4-gl-network test | xargs docker logs -f
+docker run -dp 8080:8080 --network info4-gl-network --name=rest-app xargs docker logs -ftest | xargs docker logs -f
 ```
 
+## Adding a http Proxy
+
+we will now use the static web app that is present inside the web folder.  
+It contains a simple react demo app (from the create-react-app project with the typescript template).
+
+I have only added the listing of the guest from the Rest App.
+
+So now, we want to add simple http server that would serve the html files but also to be able to redirect the REST calls to the appropriate server/container (due to CORS restrictions a browser is limiting the JS request to the site it is onto).
+
+### NGINX to the rescue
+
+we will not configure a whole nginx server. We will only make work to 
+
+```
+docker run --rm --name some-nginx -v $(pwd)/build:/usr/share/nginx/html:ro -p 54321:80 -d nginx nginx-debug -g 'daemon off;'
+docker run --name some-nginx -v $(pwd)/nginx.conf:/etc/nginx/nginx.conf -v $(pwd)/build:/usr/share/nginx/html:ro -p 54321:80 -d --network info4-gl-network nginx nginx-debug -g 'daemon off;'
+````
+
+nginx will help 
