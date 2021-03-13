@@ -1,4 +1,10 @@
 services:
+  web:
+    build: ./web
+    ports:
+      - "54321:80"
+    links:
+      - rest-app
   rest-app:
     build: ./rest-app
     ports:

@@ -5,3 +5,4 @@ web/node_modules
 rest-app/bin
 rest-app/bin/**
 rest-app/bin/**/*
+rest-app/.idea/**
