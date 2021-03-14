@@ -127,6 +127,7 @@ docker volume inspect gl-docker
 
 It will be used to store the data from containers when referenced
 
+Uncomment the commented lines in the *Dockerfile*.  
 Rebuild the whole app with 
 
 ```
@@ -145,7 +146,7 @@ docker run -dp 8081:8080 -v gl-docker:/usr/libs/data info4-gl-java-app
 Let's know use some real application and a database to store the data.  
 We now have a REST app that uses a H2 database to store the data.
 
-Uncomment the lines from the files *build.gradle*, *Guest.java* and *GuestRepository.java*
+Uncomment the lines from the files *build.gradle* or *pom.xml* to add some new dependencies, *Guest.java* and *GuestRepository.java* to enable the JPA Repository.
 
 Let's build and launch the app without docker:
 
@@ -187,11 +188,11 @@ But that is not a long term solution and that breaks the replicability of the co
 
 We need to use network for that
 
-Do the [docker tutorial for network](https://docs.docker.com/network/network-tutorial-standalone/)
+Do the [docker tutorial for network - *Use the default bridge network*](https://docs.docker.com/network/network-tutorial-standalone/#use-the-default-bridge-network)
 
 After this, update the app to have a network and use the container names in the URL and have the container talk to each other.
 
-### the network command
+### The network command
 
 ```
 docker network create info4-gl-network
@@ -202,7 +203,7 @@ docker run -dp 8080:8080 --network info4-gl-network --name=rest-app info4-gl-jav
 ## Adding a http Proxy
 
 We will now use the static web app that is present inside the web folder.  
-It contains a simple react demo app (from the create-react-app project with the typescript template).
+It contains a simple react demo app (from the [create-react-app](https://github.com/facebook/create-react-app) project with the typescript template).
 
 I have only added the listing of the guest from the Rest App.
 
@@ -210,11 +211,11 @@ So now, we want to add simple http server that would serve the html files but al
 
 ### NGINX to the rescue
 
-we will not configure a whole nginx server. We will only make work to have the static files being served and the calls to the `/guest/` folder being redirected to the *rest-app* container.
+We will not configure a whole nginx server. We will only make it work to have the static files being served and the calls to the `/guest/` folder being redirected to the *rest-app* container.
 
 ```
-docker run --rm --name some-nginx -v $(pwd)/build:/usr/share/nginx/html:ro -p 54321:80 -d nginx nginx-debug -g 'daemon off;'
-docker run --name some-nginx -v $(pwd)/nginx.conf:/etc/nginx/nginx.conf -v $(pwd)/build:/usr/share/nginx/html:ro -p 54321:80 -d --network info4-gl-network nginx nginx-debug -g 'daemon off;'
+docker run --rm --name nginx -v $(pwd)/build:/usr/share/nginx/html:ro -p 54321:80 -d nginx nginx-debug -g 'daemon off;'
+docker run --name nginx -v $(pwd)/nginx.conf:/etc/nginx/nginx.conf -v $(pwd)/build:/usr/share/nginx/html:ro -p 54321:80 -d --network info4-gl-network nginx nginx-debug -g 'daemon off;'
 ````
 
 This way, we can have a separate container that do the work we're expecting it to do.
@@ -264,13 +265,3 @@ And Job's done!
 
 Try to add the necessary container to build the *web* container and have it linked to the *rest-app*.
 
-The solution is only to add:
-
-```
-  web:
-    build: ./web
-    ports:
-      - "54321:80"
-    links:
-      - rest-app
-```
