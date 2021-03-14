@@ -6,37 +6,28 @@ interface Guest {
     lastName: string;
 }
 
-interface GuestResponse {
-  _embedded: {
-    guest: Guest[]
-  }
-}
-
 export default function GuestList() {
   const [error, setError] = useState(null as any);
   const [isLoaded, setIsLoaded] = useState(false);
   const [guests, setGuests] = useState({_embedded: {guest: [] as Guest[]}});
 
   useEffect(() => {
-    fetch("/guest/")
+    setTimeout(() => fetch("/guest/")
       .then((res) => res.json())
       .then(
         (result) => {
           setIsLoaded(true);
           setGuests(result);
         },
-        // Note: it's important to handle errors here
-        // instead of a catch() block so that we don't swallow
-        // exceptions from actual bugs in components.
         (error) => {
           setIsLoaded(true);
           setError(error);
         }
-      );
+      ), 1000)
   }, []);
 
   if (error) {
-    return <div>Error: {error.message}</div>;
+    return <div>Request failed to retrieve the guest list<br/>Error: {error.message}</div>;
   } else if (!isLoaded) {
     return <div>Loading...</div>;
   } else {
