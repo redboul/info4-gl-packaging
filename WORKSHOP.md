@@ -18,7 +18,7 @@ You can simply build the current application and start it to have a working web 
 java -jar build/libs/spring-boot-0.0.1-SNAPSHOT.jar
 ```
 
-Go to [localhost:8080](http://localhost:8080) to see the message previously saw in the `HelloController.java`
+Go to [localhost:8080/hello](http://localhost:8080/hello) to see the message previously saw in the `HelloController.java`
 
 Look at the `HelloController.java` to see what is expected.  
 Nothing special, I agree.
@@ -109,7 +109,7 @@ Go to [localhost greet someone](http://localhost:8080/greetings?greet=someone).
 
 An error is displayed. Take a look at the logs of the container.
 
-Open the `Dockerfile` and comment out the line 4 and 5.  
+Open the `Dockerfile` and uncomment the line 4 and 5.  
 Rebuild another image.
 
 Stop the former container that uses the port **8080** and start a container of the freshly built `info4-gl-java-app` image.
@@ -221,7 +221,7 @@ We need to use **docker network** for that.
 
 After this, update the app to have a network and use the container names in the URL and have the container talk to each other.
 
-**Tip**: comment out the content of `application.properties` and don't forget to rebuild the app and the docker image!
+**Tip**: uncomment the content of `application.properties` and don't forget to rebuild the app and the docker image!
 
 ### The network command
 
