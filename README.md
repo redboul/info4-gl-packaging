@@ -1,5 +1,7 @@
 # Packaging and Docker management
 
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/redboul/info4-gl-packaging)
+
 ## prerequisite
 
 You need to download and install [Docker CE](https://docs.docker.com/engine/install/) and execute the following commands to avoid spending too much time downloading them during the session.
