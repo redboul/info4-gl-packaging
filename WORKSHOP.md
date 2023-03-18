@@ -2,11 +2,24 @@
 
 ## Prerequisite
 
+### Local
+
 Take a look at the [Readme file](./README.md) to have your machine correctly setup to do the workshop.
+
+### Codespace
+
+In Github, click on the **Code** button and then on the **Codespace** panel.
+Then, click on _Open Codespace on main_ button.
+Choose **Open in browser**
+
+It opens the VS Code IDE in the browser in a virtual environment.
 
 ## Build an application
 
-Open the *rest-app* project into your favorite IDE (Eclipse/Sublime/VSCode/...) with a minimal Java text Formatting.
+Open the *rest-app* project into your favorite IDE (Eclipse/Sublime/VSCode/...) with a minimal Java text Formatting.  
+**Even if you are in Codespace!**  
+This document uses _localhost_ as hostname assuming the commands are run on your local machine.  
+When using Codespace or Gitpod, replace the hostname with the codespace host as suggested by the tooltips.
 
 Look at the `Application.java` to see the Spring App.  
 A very simple HelloWorld app is in the `HelloController` class.
@@ -20,20 +33,14 @@ java -jar build/libs/spring-boot-0.0.1-SNAPSHOT.jar
 
 Go to [localhost:8080/hello](http://localhost:8080/hello) to see the message previously saw in the `HelloController.java`
 
+_In Codespace, localhost won't work. But the IDE tells you that some ports have been open and that you can access it._
+
 Look at the `HelloController.java` to see what is expected.  
 Nothing special, I agree.
 
 ## Simple introduction to docker
 
-Launch the following simple command to ensure docker is correctly installed on your machine.
-
-```
-docker run -dp 80:80 docker/getting-started
-```
-
-If that's ok, we can have a look at the Dockerfile.
-
-Now, build the docker image with the following command.
+Build the docker image with the following command.
 
 ```
 docker build -t info4-gl-java-app .
@@ -101,7 +108,7 @@ Each time, looking at the `data.txt` the value will be different.
 
 Use the `GreetingsController.java` that reads the content of a file to Greet people.
 
-Create a file in the *data* folder named *data.txt*.
+Create a file in the *data* folder named *data.txt* (if not already present).  
 Run the app from a docker container:  `docker run -dp 8080:8080 info4-gl-java-app`  
 Look at the log to ensure the app is up `docker logs -f <container-id>`
 
@@ -109,7 +116,7 @@ Go to [localhost greet someone](http://localhost:8080/greetings?greet=someone).
 
 An error is displayed. Take a look at the logs of the container.
 
-Open the `Dockerfile` and uncomment the line 4 and 5.  
+Open the `Dockerfile` and **uncomment** the line 4 and 5.  
 Rebuild another image.
 
 Stop the former container that uses the port **8080** and start a container of the freshly built `info4-gl-java-app` image.
@@ -120,11 +127,11 @@ Stop the container and create a new one.
 
 Each time your run a new container, the data.txt file is new and nothing is persisted.
 
-Comment once more the line 4 and 5 of the `Dockerfile` and move to next section.
+**Comment** the line 4 and 5 of the `Dockerfile` and move to next section.
 
 #### Mount a local path
 
-Currently, the local `data/data.txt` file is not used by the container.  
+Currently, the local `data/data.txt` file is not edited by the container.  
 That is because the container have no visibility whatsoever of the parent machine as long as you don't share anything between them.
 
 The `-v local_absolute_path:container_absolute_path` option allows you to play with so called **volumes** with the container.
@@ -132,7 +139,7 @@ The `-v local_absolute_path:container_absolute_path` option allows you to play w
 Ensure the image of the `info4-gl-java-app` is up-to-date (run `docker build -t info4-gl-java-app .`) and add the volume option to the already famous command:
 
 ```
-docker run -dp 8080:8080 -v "$(pwd)"/data:/usr/libs/data info4-gl-java-app
+docker run -rm -dp 8080:8080 -v "$(pwd)"/data:/usr/libs/data info4-gl-java-app
 ```
 
 #### Create a volume
