@@ -168,12 +168,12 @@ Rebuild the whole app with
 ```
 ./gradlew build
 docker build -t info4-gl-java-app .
-docker run -dp 8080:8080 -v gl-docker:/usr/libs/data info4-gl-java-app
+docker run --rm -dp 8080:8080 -v gl-docker:/usr/libs/data info4-gl-java-app
 ```
 
 You can even launch several container sharing the same volume and see that the data are shared. But you need to update the port to avoid sharing the same port between container which is not allowed.
 ```
-docker run -dp 8081:8080 -v gl-docker:/usr/libs/data info4-gl-java-app
+docker run --rm -dp 8081:8080 -v gl-docker:/usr/libs/data info4-gl-java-app
 ```
 
 ## Communication between container
@@ -181,7 +181,10 @@ docker run -dp 8081:8080 -v gl-docker:/usr/libs/data info4-gl-java-app
 Let's know use some real application and a database to store the data.  
 We now have a REST app that uses a H2 database to store the data.
 
-Comment out the lines from the files *build.gradle* or *pom.xml* to add some new dependenciesa and also in *Guest.java* and *GuestRepository.java* to enable the JPA Repository framework.
+Uncomment the lines from the files *build.gradle* or *pom.xml* to add some new dependenciesa and also in *Guest.java* and *GuestRepository.java* to enable the JPA Repository framework.
+
+_Note_: In VSCode Codespace > Java Project panel, right click on the main project, Click on **Gradle** > Reload Project.  
+It updates your VS Code dependencies.
 
 Let's build and launch the app without docker:
 
@@ -208,12 +211,15 @@ Body:
 ### Add some Data with `curl`
 
 ```
-curl -X POST  -H "Content-Type: application/json" -d '{"firstName": "Joann", "lastName": "Sfar"}' http://localhost:8080/guest
+curl -X POST  -H "Content-Type: application/json" -d '{"firstName": "Joan", "lastName": "Sfar"}' http://localhost:8080/guest
 ```
 
 Now you can reload the [guest list](http://localhost:8080/guest) or go directly to the [new guest](http://localhost:8080/guest/1) we have just created.
 
-H2 is the default database launched by Spring Boot when there is no configuration present. It is a in memory database which goes fine there but is hosted inside the Java memory.
+
+### Persisting data
+
+H2 is the default database launched by Spring Boot when there is no configuration present. It is a in memory database which goes fine here. But, it is hosted inside the Java memory.
 But let's say we have an external database launched in another container.
 
 For your application to be able to use it, Spring needs to have the right settings to point to the database.  
@@ -224,19 +230,36 @@ But that is not a long term solution and that breaks the replicability of the co
 
 We need to use **docker network** for that.
 
+### The network command
+
+#### _Optional_ Preliminary step
+
 **Optional**: Do the [docker tutorial for network - *Use the default bridge network*](https://docs.docker.com/network/network-tutorial-standalone/#use-the-default-bridge-network)
 
-After this, update the app to have a network and use the container names in the URL and have the container talk to each other.
+
+#### Communication across container
+
+Update the app to have a network and use the container names in the URL and have the container talk to each other.
 
 **Tip**: uncomment the content of `application.properties` and don't forget to rebuild the app and the docker image!
 
-### The network command
-
 ```
+./gradlew build
+docker build -t info4-gl-java-app .
 docker network create info4-gl-network
-docker run -d -p 1521:1521 -p 81:81 -v data:/opt/h2-data --network info4-gl-network  -e H2_OPTIONS='-ifNotExists' --name=MyH2Instance oscarfonts/h2
-docker run -dp 8080:8080 --network info4-gl-network --name=rest-app info4-gl-java-app  | xargs docker logs -f
+docker run --rm -d -p 1521:1521 -p 81:81 -v data:/opt/h2-data --network info4-gl-network  -e H2_OPTIONS='-ifNotExists' --name=MyH2Instance oscarfonts/h2
+docker run --rm -dp 8080:8080 --network info4-gl-network --name=rest-app info4-gl-java-app  | xargs docker logs -f
 ```
+
+Go To the [guest list](http://localhost:8080/guest). As the db container is fresh new, it contains no data. But you can add some using the curl commands as before.  
+The difference here is that the DB container is independent from the App server. 
+Which means you can reload the app server to make changes and still have the data from previous tests available.
+
+Go to the [DB2 Web Client](http://localhost:81/guest) and connect with empty admin password on this JDBC URL: **jdbc:h2:tcp://localhost:1521/info4-gl**.  
+Execute `SELECT * FROM GUEST` after having added some guests to see the list here too.
+
+We now have a backend solution of our multi-tier docker app.  
+Let's add a web server now.
 
 ## Adding a http Proxy
 
@@ -251,11 +274,21 @@ So now, we want to add simple http server that would serve the html files but al
 
 Open a new terminal window and go to the `web` directory.
 
+First, build the web app.
+
+On Codespace, downgrade the current version of node using the command
+
+```
+nvm install 16
+``` 
+
+The run `yarn && yarn build` 
+
 We will not configure a whole nginx server. We will only make it work to have the static files being served and the calls to the `/guest/` folder being redirected to the *rest-app* container.
 
 ```
 docker run --rm --name nginx -v $(pwd)/nginx.conf:/etc/nginx/nginx.conf -v $(pwd)/build:/usr/share/nginx/html:ro -p 54321:80 -d --network info4-gl-network nginx nginx-debug -g 'daemon off;'
-````
+```
 
 This way, we can have a separate container that do the work we're expecting it to do.
 
